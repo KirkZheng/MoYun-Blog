@@ -7,7 +7,7 @@ def run_crawler():
     """运行爬虫"""
     print("\n开始运行爬虫...")
     try:
-        subprocess.run([sys.executable, 'fast_crawler.py'], check=True)
+        subprocess.run([sys.executable, 'crawler.py'], check=True)
         print("爬虫运行完成！")
     except subprocess.CalledProcessError as e:
         print(f"爬虫运行失败: {e}")
