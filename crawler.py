@@ -22,7 +22,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class FastBlogCrawler:
+class BlogCrawler:
     def __init__(self, base_url, target_count=1000, max_workers=10):
         self.base_url = base_url
         self.target_count = target_count
@@ -392,7 +392,7 @@ def main():
     target_count = 1000
     max_workers = 10  # 增加并发数
     
-    crawler = FastBlogCrawler(base_url, target_count, max_workers)
+    crawler = BlogCrawler(base_url, target_count, max_workers)
     
     start_time = time.time()
     posts = crawler.crawl_all_posts()
