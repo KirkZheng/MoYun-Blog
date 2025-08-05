@@ -20,47 +20,6 @@
     {% endfor %}
 </div>
 
-<!-- 分页导航 -->
-{% if posts.pages > 1 %}
-<nav aria-label="文章分页" class="mt-5">
-    <ul class="pagination justify-content-center">
-        {% if posts.has_prev %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('index', page=posts.prev_num) }}" aria-label="上一页">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        {% endif %}
-        
-        {% for page_num in posts.iter_pages() %}
-            {% if page_num %}
-                {% if page_num != posts.page %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
-                    </li>
-                {% else %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ page_num }}</span>
-                    </li>
-                {% endif %}
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">…</span>
-                </li>
-            {% endif %}
-        {% endfor %}
-        
-        {% if posts.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('index', page=posts.next_num) }}" aria-label="下一页">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
-
 <!-- 加载提示 -->
 <div id="loading" class="text-center mt-4" style="display: none;">
     <div class="spinner-border" role="status">
