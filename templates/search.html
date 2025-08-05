@@ -39,14 +39,6 @@
                         <a href="/post/{{ post.id }}" class="text-decoration-none">{{ post.title }}</a>
                     </h5>
                     <p class="card-text text-muted">{{ post.summary or post.content[:200] + '...' }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                            <i class="bi bi-calendar"></i> {{ post.publish_date.strftime('%Y-%m-%d') if post.publish_date else '未知日期' }}
-                        </small>
-                        <a href="/post/{{ post.id }}" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-eye"></i> 查看详情
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

@@ -4,7 +4,6 @@ from datetime import datetime, date
 from typing import List, Dict, Optional
 import threading
 from collections import defaultdict
-import re
 
 class BlogDataManager:
     def __init__(self, data_file='blog_data.json'):
@@ -20,7 +19,6 @@ class BlogDataManager:
                 with open(self.data_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     self.posts = data.get('posts', [])
-                    # 转换日期字符串为date对象
                     for post in self.posts:
                         if post.get('publish_date'):
                             post['publish_date'] = datetime.fromisoformat(post['publish_date']).date()
@@ -34,7 +32,6 @@ class BlogDataManager:
         """保存数据到JSON文件"""
         with self.lock:
             try:
-                # 转换date对象为字符串
                 data_to_save = []
                 for post in self.posts:
                     post_copy = post.copy()
@@ -47,18 +44,6 @@ class BlogDataManager:
             except Exception as e:
                 print(f"保存数据失败: {e}")
     
-    def add_post(self, post_data: Dict):
-        """添加新文章"""
-        with self.lock:
-            # 检查是否已存在
-            if not self.post_exists(post_data.get('url')):
-                post_data['id'] = len(self.posts) + 1
-                post_data['created_at'] = datetime.now().isoformat()
-                post_data['updated_at'] = datetime.now().isoformat()
-                self.posts.append(post_data)
-                return True
-            return False
-    
     def add_posts_batch(self, posts_list: List[Dict]):
         """批量添加文章"""
         added_count = 0
@@ -67,7 +52,6 @@ class BlogDataManager:
                 if not self.post_exists(post_data.get('url')):
                     post_data['id'] = len(self.posts) + 1
                     post_data['created_at'] = datetime.now().isoformat()
-                    post_data['updated_at'] = datetime.now().isoformat()
                     self.posts.append(post_data)
                     added_count += 1
         return added_count
@@ -78,7 +62,6 @@ class BlogDataManager:
     
     def get_all_posts(self, page: int = 1, per_page: int = 12) -> Dict:
         """获取所有文章（分页）"""
-        # 按ID降序排序（因为publish_date大多为null）
         sorted_posts = sorted(self.posts, key=lambda x: x.get('id', 0), reverse=True)
         
         start = (page - 1) * per_page
@@ -103,7 +86,6 @@ class BlogDataManager:
                 query_lower in post.get('summary', '').lower()):
                 filtered_posts.append(post)
         
-        # 按ID降序排序（与首页保持一致）
         sorted_posts = sorted(filtered_posts, key=lambda x: x.get('id', 0), reverse=True)
         
         start = (page - 1) * per_page
@@ -163,7 +145,6 @@ class BlogDataManager:
                 
                 filtered_posts.append(post)
         
-        # 按发布日期降序排序
         sorted_posts = sorted(filtered_posts, key=lambda x: x.get('publish_date', date.min), reverse=True)
         
         start = (page - 1) * per_page
@@ -175,13 +156,6 @@ class BlogDataManager:
             'page': page,
             'per_page': per_page,
             'pages': (len(sorted_posts) + per_page - 1) // per_page
-        }
-    
-    def get_stats(self) -> Dict:
-        """获取统计信息"""
-        return {
-            'total_posts': len(self.posts),
-            'date_groups': len(self.get_date_groups())
         }
 
 # 全局数据管理器实例
