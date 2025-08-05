@@ -31,30 +31,6 @@ def search():
     
     return render_template('search.html', posts=result, query=query)
 
-@app.route('/archive')
-def archive():
-    """归档页面"""
-    year = request.args.get('year', type=int)
-    month = request.args.get('month', type=int)
-    page = request.args.get('page', 1, type=int)
-    per_page = 12
-    
-    if year or month:
-        result = data_manager.get_posts_by_date(year=year, month=month, page=page, per_page=per_page)
-        archive_title = f"{year}年{month}月" if year and month else f"{year}年" if year else f"{month}月"
-    else:
-        result = data_manager.get_all_posts(page=page, per_page=per_page)
-        archive_title = "所有文章"
-    
-    date_groups = data_manager.get_date_groups()
-    
-    return render_template('archive.html', 
-                         posts=result, 
-                         date_groups=date_groups,
-                         archive_title=archive_title,
-                         current_year=year,
-                         current_month=month)
-
 @app.route('/post/<int:post_id>')
 def post_detail(post_id):
     """文章详情页"""
