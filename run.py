@@ -30,7 +30,8 @@ def main():
     print("博客爬虫系统")
     print("=" * 40)
     
-    if not os.path.exists('fast_crawler.py'):
+    # 修复：检查crawler.py而不是fast_crawler.py
+    if not os.path.exists('crawler.py'):
         print("错误: 请在项目根目录运行此脚本")
         return
     
