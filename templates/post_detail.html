@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">首页</a></li>
+        <li class="breadcrumb-item active" aria-current="page">文章详情</li>
+    </ol>
+</nav>
+
+<article class="card">
+    <div class="card-body">
+        <h1 class="card-title">{{ post.title }}</h1>
+        <div class="text-muted mb-3">
+            <i class="bi bi-calendar"></i> 发布时间: 
+            {% if post.publish_date %}
+                {% if post.publish_date is string %}
+                    {{ post.publish_date }}
+                {% else %}
+                    {{ post.publish_date.strftime('%Y年%m月%d日') }}
+                {% endif %}
+            {% else %}
+                未知日期
+            {% endif %}
+            {% if post.updated_at %}
+            <span class="ms-3">
+                <i class="bi bi-clock"></i> 更新时间: {{ post.updated_at[:19] if post.updated_at is string else post.updated_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+            {% endif %}
+        </div>
+        
+        <div class="card-text" style="line-height: 1.8;">
+            {{ post.content|safe }}
+        </div>
+        
+        {% if post.url and post.url != request.url %}
+        <hr>
+        <p><strong>原文链接:</strong> 
+            <a href="{{ post.url }}" target="_blank" class="text-decoration-none">
+                <i class="bi bi-link-45deg"></i> {{ post.url }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+</article>
+
+<div class="row mt-4">
+    <div class="col-6">
+        <a href="/" class="btn btn-outline-secondary">
+            <i class="bi bi-chevron-left"></i> 返回首页
+        </a>
+    </div>
+</div>
+{% endblock %}

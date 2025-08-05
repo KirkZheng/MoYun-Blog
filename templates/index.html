@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}书山有路勤为径，学海无涯苦作舟{% endblock %}
+
+{% block content %}
+<div id="posts-container" class="row">
+    {% for post in posts.posts %}
+    <div class="col-md-6 col-lg-4 post-item">
+        <div class="card post-card h-100 clickable-card" onclick="window.location.href='/post/{{ post.id }}'">
+            <div class="card-body p-4">
+                <h5 class="card-title">
+                    <a href="/post/{{ post.id }}" class="text-decoration-none stretched-link">{{ post.title }}</a>
+                </h5>
+                <div class="post-summary text-muted mb-3">
+                    {{ post.summary or '暂无摘要' }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 加载提示 -->
+<div id="loading" class="text-center mt-4" style="display: none;">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">加载中...</span>
+    </div>
+    <p class="mt-3 text-muted" style="font-style: italic;">正在加载更多文章...</p>
+</div>
+
+<!-- 无更多内容提示 -->
+<div id="no-more" class="text-center mt-4" style="display: none;">
+    <p class="text-muted" style="font-style: italic;">"山重水复疑无路，柳暗花明又一村" - 已加载全部文章</p>
+</div>
+
+<script>
+let currentPage = {{ posts.page }};
+let totalPages = {{ posts.pages }};
+let isLoading = false;
+
+// 无限滚动功能
+function handleScroll() {
+    if (isLoading || currentPage >= totalPages) return;
+    
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    
+    // 当滚动到距离底部200px时开始加载
+    if (scrollTop + windowHeight >= documentHeight - 200) {
+        loadMorePosts();
+    }
+}
+
+// 加载更多文章
+function loadMorePosts() {
+    if (isLoading || currentPage >= totalPages) return;
+    
+    isLoading = true;
+    document.getElementById('loading').style.display = 'block';
+    
+    fetch(`/api/posts?page=${currentPage + 1}&per_page=12`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data.posts.length > 0) {
+                appendPosts(data.data.posts);
+                currentPage = data.data.page;
+                totalPages = data.data.pages;
+            }
+            
+            if (currentPage >= totalPages) {
+                document.getElementById('no-more').style.display = 'block';
+                window.removeEventListener('scroll', handleScroll);
+            }
+        })
+        .catch(error => {
+            console.error('加载失败:', error);
+        })
+        .finally(() => {
+            isLoading = false;
+            document.getElementById('loading').style.display = 'none';
+        });
+}
+
+// 添加文章到页面
+function appendPosts(posts) {
+    const container = document.getElementById('posts-container');
+    
+    posts.forEach(post => {
+        const postElement = createPostElement(post);
+        container.appendChild(postElement);
+        
+        // 添加淡入动画
+        setTimeout(() => {
+            postElement.style.opacity = '1';
+            postElement.style.transform = 'translateY(0)';
+        }, 100);
+    });
+}
+
+// 创建文章元素
+function createPostElement(post) {
+    const div = document.createElement('div');
+    div.className = 'col-md-6 col-lg-4 post-item';
+    div.style.opacity = '0';
+    div.style.transform = 'translateY(20px)';
+    div.style.transition = 'all 0.3s ease';
+    
+    div.innerHTML = `
+        <div class="card post-card h-100 clickable-card" onclick="window.location.href='/post/${post.id}'">
+            <div class="card-body p-4">
+                <h5 class="card-title">
+                    <a href="/post/${post.id}" class="text-decoration-none stretched-link">${post.title}</a>
+                </h5>
+                <div class="post-summary text-muted mb-3">
+                    ${post.summary || '暂无摘要'}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// 绑定滚动事件
+window.addEventListener('scroll', handleScroll);
+
+// 页面加载完成后的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 如果没有更多页面，显示提示
+    if (currentPage >= totalPages) {
+        document.getElementById('no-more').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}
+
+<style>
+.post-item {
+    margin-bottom: 20px;
+}
+
+.post-card {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.clickable-card {
+    cursor: pointer;
+}
+
+.clickable-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.clickable-card:active {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.stretched-link {
+    color: inherit;
+}
+
+.stretched-link:hover {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+#loading {
+    padding: 20px;
+}
+
+#no-more {
+    padding: 20px;
+    border-top: 1px solid #eee;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .post-item {
+        margin-bottom: 15px;
+    }
+    
+    .clickable-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+}
+</style>
