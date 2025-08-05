@@ -33,105 +33,65 @@
     <p class="text-muted" style="font-style: italic;">"山重水复疑无路，柳暗花明又一村" - 已加载全部文章</p>
 </div>
 
+<!-- 在现有的JavaScript部分添加以下修改 -->
 <script>
-let currentPage = {{ posts.page }};
-let totalPages = {{ posts.pages }};
-let isLoading = false;
-
-// 无限滚动功能
-function handleScroll() {
-    if (isLoading || currentPage >= totalPages) return;
+// 修改无限滚动加载函数
+async function loadMorePosts() {
+    if (loading || !hasMore) return;
     
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
+    loading = true;
+    showLoading();
     
-    // 当滚动到距离底部200px时开始加载
-    if (scrollTop + windowHeight >= documentHeight - 200) {
-        loadMorePosts();
+    try {
+        // 修改为静态文件路径
+        const response = await fetch(`./api/posts/page_${page}.json`);
+        
+        if (!response.ok) {
+            hasMore = false;
+            hideLoading();
+            return;
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.data.posts.length > 0) {
+            result.data.posts.forEach(post => {
+                const postElement = createPostElement(post);
+                postsContainer.appendChild(postElement);
+            });
+            
+            page++;
+            hasMore = result.data.has_next;
+        } else {
+            hasMore = false;
+        }
+    } catch (error) {
+        console.error('加载文章失败:', error);
+        hasMore = false;
+    } finally {
+        loading = false;
+        hideLoading();
     }
 }
 
-// 加载更多文章
-function loadMorePosts() {
-    if (isLoading || currentPage >= totalPages) return;
-    
-    isLoading = true;
-    document.getElementById('loading').style.display = 'block';
-    
-    fetch(`/api/posts?page=${currentPage + 1}&per_page=12`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.data.posts.length > 0) {
-                appendPosts(data.data.posts);
-                currentPage = data.data.page;
-                totalPages = data.data.pages;
-            }
-            
-            if (currentPage >= totalPages) {
-                document.getElementById('no-more').style.display = 'block';
-                window.removeEventListener('scroll', handleScroll);
-            }
-        })
-        .catch(error => {
-            console.error('加载失败:', error);
-        })
-        .finally(() => {
-            isLoading = false;
-            document.getElementById('loading').style.display = 'none';
-        });
-}
-
-// 添加文章到页面
-function appendPosts(posts) {
-    const container = document.getElementById('posts-container');
-    
-    posts.forEach(post => {
-        const postElement = createPostElement(post);
-        container.appendChild(postElement);
-        
-        // 添加淡入动画
-        setTimeout(() => {
-            postElement.style.opacity = '1';
-            postElement.style.transform = 'translateY(0)';
-        }, 100);
-    });
-}
-
-// 创建文章元素
+// 修改文章元素创建函数中的链接
 function createPostElement(post) {
-    const div = document.createElement('div');
-    div.className = 'col-md-6 col-lg-4 post-item';
-    div.style.opacity = '0';
-    div.style.transform = 'translateY(20px)';
-    div.style.transition = 'all 0.3s ease';
+    const postDiv = document.createElement('div');
+    postDiv.className = 'col-md-6 col-lg-4 mb-4';
     
-    div.innerHTML = `
-        <div class="card post-card h-100 clickable-card" onclick="window.location.href='/post/${post.id}'">
-            <div class="card-body p-4">
+    postDiv.innerHTML = `
+        <div class="card post-card h-100">
+            <div class="card-body d-flex flex-column">
                 <h5 class="card-title">
-                    <a href="/post/${post.id}" class="text-decoration-none stretched-link">${post.title}</a>
+                    <a href="./post/${post.id}.html" class="text-decoration-none">${post.title}</a>
                 </h5>
-                <div class="post-summary text-muted mb-3">
-                    ${post.summary || '暂无摘要'}
-                </div>
+                <p class="card-text flex-grow-1">${post.summary || post.content.substring(0, 150) + '...'}</p>
             </div>
         </div>
     `;
     
-    return div;
+    return postDiv;
 }
-
-// 绑定滚动事件
-window.addEventListener('scroll', handleScroll);
-
-// 页面加载完成后的初始化
-document.addEventListener('DOMContentLoaded', function() {
-    // 如果没有更多页面，显示提示
-    if (currentPage >= totalPages) {
-        document.getElementById('no-more').style.display = 'block';
-    }
-});
 </script>
 {% endblock %}
 
