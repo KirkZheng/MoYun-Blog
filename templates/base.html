@@ -121,82 +121,79 @@
         }
         
         .post-card:hover {
-            transform: translateY(-12px) scale(1.02);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        .post-card:hover::before {
+            height: 6px;
         }
         
         .card-title {
             color: var(--ink-black);
-            font-weight: 600;
+            font-weight: 500;
             font-size: 1.3rem;
-            line-height: 1.4;
             margin-bottom: 15px;
-            position: relative;
+            line-height: 1.4;
         }
         
-        .card-title::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--bamboo-green);
-            transition: width 0.3s ease;
+        .card-title a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
         
-        .post-card:hover .card-title::after {
-            width: 100%;
+        .card-title a:hover {
+            color: var(--bamboo-green);
         }
         
         .post-summary {
             color: var(--ink-gray);
             line-height: 1.6;
             font-size: 0.95rem;
-            max-height: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            position: relative;
         }
         
         .clickable-card {
             cursor: pointer;
         }
         
-        .stretched-link {
-            color: inherit;
-            text-decoration: none;
+        .btn-primary {
+            background: linear-gradient(45deg, var(--bamboo-green), var(--mountain-blue));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
         
-        .stretched-link:hover {
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        }
+        
+        .pagination .page-link {
             color: var(--bamboo-green);
+            border: 2px solid var(--mountain-blue);
+            border-radius: 8px;
+            margin: 0 3px;
+            transition: all 0.3s ease;
         }
         
-        #loading {
-            padding: 40px;
+        .pagination .page-link:hover {
+            background: var(--bamboo-green);
+            border-color: var(--bamboo-green);
+            color: white;
+            transform: translateY(-2px);
         }
         
-        .spinner-border {
-            color: var(--bamboo-green) !important;
+        .pagination .page-item.active .page-link {
+            background: var(--bamboo-green);
+            border-color: var(--bamboo-green);
         }
         
-        #no-more {
-            padding: 40px;
-            border-top: 2px solid var(--mist-gray);
-            background: rgba(255,255,255,0.8);
-            border-radius: 15px;
-            margin-top: 30px;
-        }
-        
-        /* 响应式调整 */
         @media (max-width: 768px) {
             .navbar-brand {
                 font-size: 1.3rem;
-                letter-spacing: 0.5px;
-            }
-            
-            .post-card:hover {
-                transform: translateY(-6px) scale(1.01);
             }
             
             .card-title {

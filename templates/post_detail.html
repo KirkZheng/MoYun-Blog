@@ -13,23 +13,6 @@
 <article class="card">
     <div class="card-body">
         <h1 class="card-title">{{ post.title }}</h1>
-        <div class="text-muted mb-3">
-            <i class="bi bi-calendar"></i> 发布时间: 
-            {% if post.publish_date %}
-                {% if post.publish_date is string %}
-                    {{ post.publish_date }}
-                {% else %}
-                    {{ post.publish_date.strftime('%Y年%m月%d日') }}
-                {% endif %}
-            {% else %}
-                未知日期
-            {% endif %}
-            {% if post.updated_at %}
-            <span class="ms-3">
-                <i class="bi bi-clock"></i> 更新时间: {{ post.updated_at[:19] if post.updated_at is string else post.updated_at.strftime('%Y-%m-%d %H:%M') }}
-            </span>
-            {% endif %}
-        </div>
         
         <div class="card-text" style="line-height: 1.8;">
             {{ post.content|safe }}
