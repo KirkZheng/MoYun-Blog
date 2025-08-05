@@ -5,13 +5,14 @@ import time
 from datetime import datetime, date
 import re
 from urllib.parse import urljoin, urlparse, parse_qs
-from models import db, BlogPost
-from app import create_app
+# 删除: from models import db, BlogPost
+# 删除: from app import create_app
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from typing import List, Set, Dict
 import random
+from data_manager import data_manager  # 添加这行
 
 # 配置日志
 logging.basicConfig(
@@ -347,57 +348,21 @@ class EnhancedBlogCrawler:
         return posts
     
     def save_posts_batch(self, posts_batch):
-        """批量保存文章到数据库"""
-        if not posts_batch:
-            return 0, 0
-        
-        saved_count = 0
-        updated_count = 0
-        
+        """批量保存文章到JSON文件"""
         try:
             for post_data in posts_batch:
-                # 检查是否已存在（基于标题和URL）
-                existing_post = BlogPost.query.filter(
-                    db.or_(
-                        db.and_(BlogPost.title == post_data['title'], BlogPost.url == post_data['url']),
-                        BlogPost.title == post_data['title']  # 标题相同也认为是重复
-                    )
-                ).first()
-                
-                if existing_post:
-                    # 更新现有文章
-                    if existing_post.content != post_data['content']:
-                        existing_post.content = post_data['content']
-                        existing_post.summary = post_data['summary']
-                        existing_post.publish_date = post_data['publish_date']
-                        existing_post.updated_at = datetime.utcnow()
-                        updated_count += 1
+                if not data_manager.post_exists(post_data['url']):
+                    data_manager.add_post(post_data)
+                    logger.info(f"保存文章: {post_data['title']}")
                 else:
-                    # 创建新文章
-                    new_post = BlogPost(
-                        title=post_data['title'],
-                        content=post_data['content'],
-                        summary=post_data['summary'],
-                        url=post_data['url'],
-                        publish_date=post_data['publish_date']
-                    )
-                    db.session.add(new_post)
-                    saved_count += 1
+                    logger.info(f"文章已存在，跳过: {post_data['title']}")
             
-            db.session.commit()
-            
-            with self.lock:
-                self.posts_count += saved_count
-            
-            logger.info(f"批量保存完成: 新增 {saved_count} 篇，更新 {updated_count} 篇")
+            data_manager.save_data()
+            logger.info(f"批量保存完成，共 {len(posts_batch)} 篇文章")
             
         except Exception as e:
-            db.session.rollback()
-            logger.error(f"数据库操作失败: {e}")
-            return 0, 0
-        
-        return saved_count, updated_count
-    
+            logger.error(f"保存文章失败: {e}")
+
     def crawl_single_page(self, url):
         """爬取单个页面"""
         if url in self.crawled_urls or self.posts_count >= self.target_count:
@@ -529,37 +494,22 @@ class EnhancedBlogCrawler:
         return all_posts
 
 def main():
-    # 创建Flask应用上下文
-    app = create_app()
+    """主函数"""
+    base_url = "https://example-blog.com"  # 替换为实际的博客URL
     
-    with app.app_context():
-        # 创建数据库表
-        db.create_all()
-        
-        # 检查当前数据库中的文章数量
-        current_count = BlogPost.query.count()
-        logger.info(f"数据库中现有文章: {current_count} 篇")
-        
-        # 计算需要爬取的数量
-        target_count = max(1000, current_count + 100)  # 至少1000篇，或在现有基础上增加100篇
-        
-        # 开始爬取
-        crawler = EnhancedBlogCrawler(
-            base_url='https://hwv430.blogspot.com/',
-            target_count=target_count,
-            max_workers=3  # 适中的并发数，避免被封
-        )
-        
-        posts = crawler.crawl_all_posts()
-        
-        # 最终统计
-        final_count = BlogPost.query.count()
-        logger.info(f"爬取完成！数据库中现有文章: {final_count} 篇")
-        
-        if final_count >= 1000:
-            logger.info("✅ 已达到1000篇文章的目标！")
-        else:
-            logger.warning(f"⚠️ 未达到1000篇目标，当前: {final_count} 篇")
+    crawler = EnhancedBlogCrawler(
+        base_url=base_url,
+        target_count=1000,
+        max_workers=5
+    )
+    
+    try:
+        crawler.crawl_all_posts()
+        logger.info("爬取任务完成！")
+    except KeyboardInterrupt:
+        logger.info("爬取被用户中断")
+    except Exception as e:
+        logger.error(f"爬取过程中出现错误: {e}")
 
 if __name__ == '__main__':
     main()
