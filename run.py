@@ -7,7 +7,7 @@ def run_crawler():
     """运行爬虫"""
     print("\n开始运行爬虫...")
     try:
-        subprocess.run([sys.executable, 'crawler.py'], check=True)
+        subprocess.run([sys.executable, 'fast_crawler.py'], check=True)
         print("爬虫运行完成！")
     except subprocess.CalledProcessError as e:
         print(f"爬虫运行失败: {e}")
@@ -30,8 +30,7 @@ def main():
     print("博客爬虫系统")
     print("=" * 40)
     
-    # 修复：检查crawler.py而不是fast_crawler.py
-    if not os.path.exists('crawler.py'):
+    if not os.path.exists('fast_crawler.py'):
         print("错误: 请在项目根目录运行此脚本")
         return
     

@@ -1479,3 +1479,130 @@
 2025-08-05 23:12:38,445 - INFO - 已爬取 0 篇文章，总计: 660/1000
 2025-08-05 23:12:38,648 - INFO - 正在爬取: https://shop.nationalarchives.gov.uk/pages/contact-us
 2025-08-05 23:12:38,648 - INFO - 已爬取 0 篇文章，总计: 660/1000
+2025-08-05 23:19:38,193 - INFO - 开始爬取，目标: 1000 篇文章，并发数: 10
+2025-08-05 23:19:38,194 - INFO - 正在爬取: https://hwv430.blogspot.com/search?max-results=50
+2025-08-05 23:19:38,194 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2024-12-31T23:59:59%2B08:00&max-results=50
+2025-08-05 23:19:38,194 - INFO - 正在爬取: https://hwv430.blogspot.com
+2025-08-05 23:19:40,862 - INFO - 已爬取 15 篇文章，总计: 111/1000
+2025-08-05 23:19:41,364 - INFO - 已爬取 46 篇文章，总计: 111/1000
+2025-08-05 23:19:42,043 - INFO - 已爬取 50 篇文章，总计: 111/1000
+2025-08-05 23:19:42,044 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E8%BD%AC
+2025-08-05 23:19:42,044 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/FUN
+2025-08-05 23:19:42,045 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-07-10T12:00:00%2B08:00&max-results=50&start=50&by-date=false
+2025-08-05 23:19:42,045 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E6%B5%8B%E8%AF%95
+2025-08-05 23:19:42,045 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/porn
+2025-08-05 23:19:42,045 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E4%BB%80%E4%B9%88%E9%83%BD%E7%9F%A5%E9%81%93
+2025-08-05 23:19:42,048 - INFO - 正在爬取: https://hwv430.blogspot.com/
+2025-08-05 23:19:42,049 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/Over%20GFW
+2025-08-05 23:19:42,051 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/opinions
+2025-08-05 23:19:42,052 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E6%97%B6%E6%94%BF
+2025-08-05 23:19:43,600 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E6%88%B7%E5%A4%96
+2025-08-05 23:19:43,615 - INFO - 已爬取 9 篇文章，总计: 161/1000
+2025-08-05 23:19:43,958 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-03-08T02:00:00%2B08:00&max-results=50&reverse-paginate=true
+2025-08-05 23:19:43,958 - INFO - 已爬取 39 篇文章，总计: 185/1000
+2025-08-05 23:19:44,205 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2024-11-21T13:18:00%2B08:00&max-results=50&start=46&by-date=false
+2025-08-05 23:19:44,221 - INFO - 已爬取 1 篇文章，总计: 200/1000
+2025-08-05 23:19:44,252 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E8%BD%AF%E4%BB%B6
+2025-08-05 23:19:44,268 - INFO - 已爬取 19 篇文章，总计: 202/1000
+2025-08-05 23:19:44,357 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/news
+2025-08-05 23:19:44,357 - INFO - 已爬取 1 篇文章，总计: 203/1000
+2025-08-05 23:19:44,575 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-07-27T01:00:00%2B08:00&max-results=15
+2025-08-05 23:19:44,576 - INFO - 已爬取 2 篇文章，总计: 203/1000
+2025-08-05 23:19:44,950 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/star
+2025-08-05 23:19:44,950 - INFO - 已爬取 15 篇文章，总计: 203/1000
+2025-08-05 23:19:45,073 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/UpdateLess
+2025-08-05 23:19:45,089 - INFO - 已爬取 3 篇文章，总计: 218/1000
+2025-08-05 23:19:45,325 - INFO - 已爬取 2 篇文章，总计: 218/1000
+2025-08-05 23:19:45,449 - INFO - 已爬取 1 篇文章，总计: 226/1000
+2025-08-05 23:19:46,025 - INFO - 已爬取 8 篇文章，总计: 263/1000
+2025-08-05 23:19:46,166 - INFO - 已爬取 15 篇文章，总计: 279/1000
+2025-08-05 23:19:46,618 - INFO - 已爬取 35 篇文章，总计: 294/1000
+2025-08-05 23:19:47,320 - INFO - 已爬取 2 篇文章，总计: 362/1000
+2025-08-05 23:19:47,358 - INFO - 已爬取 16 篇文章，总计: 362/1000
+2025-08-05 23:19:47,656 - INFO - 已爬取 20 篇文章，总计: 362/1000
+2025-08-05 23:19:48,002 - INFO - 已爬取 15 篇文章，总计: 362/1000
+2025-08-05 23:19:48,185 - INFO - 已爬取 48 篇文章，总计: 362/1000
+2025-08-05 23:19:48,193 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/FUN?updated-max=2016-07-01T18:25:00%2B08:00&max-results=20&start=20&by-date=false
+2025-08-05 23:19:48,193 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/porn?updated-max=2016-05-05T09:13:00%2B08:00&max-results=20&start=19&by-date=false
+2025-08-05 23:19:48,193 - INFO - 正在爬取: https://annas-archive.org/md5/6fbbb131a6fda227bacbfc5188ba1a54
+2025-08-05 23:19:48,193 - INFO - 正在爬取: https://archive.md/
+2025-08-05 23:19:48,194 - INFO - 正在爬取: https://quickcacheandarchivesearch.onrender.com/
+2025-08-05 23:19:48,194 - INFO - 正在爬取: http://wayback.archive-it.org/
+2025-08-05 23:19:48,194 - INFO - 正在爬取: https://2023.redircdn.com/?https://annas-archive______org&z
+2025-08-05 23:19:48,194 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-01-11T12:00:00%2B08:00&max-results=50&reverse-paginate=true
+2025-08-05 23:19:48,194 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/Over%20GFW?updated-max=2016-03-26T23:27:00%2B08:00&max-results=20&start=20&by-date=false
+2025-08-05 23:19:48,194 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/UpdateLess?updated-max=2016-03-18T23:47:00%2B08:00&max-results=20&start=20&by-date=false
+2025-08-05 23:19:49,608 - INFO - 正在爬取: http://webarchive.loc.gov/
+2025-08-05 23:19:49,608 - INFO - 已爬取 0 篇文章，总计: 415/1000
+2025-08-05 23:19:50,003 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/opinions?updated-max=2016-09-11T11:38:00%2B08:00&max-results=20&start=20&by-date=false
+2025-08-05 23:19:50,004 - INFO - 已爬取 0 篇文章，总计: 415/1000
+2025-08-05 23:19:50,067 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/news?updated-max=2016-06-29T20:45:00%2B08:00&max-results=20&start=16&by-date=false
+2025-08-05 23:19:50,067 - INFO - 已爬取 0 篇文章，总计: 415/1000
+2025-08-05 23:19:50,105 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-06-14T11:34:00%2B08:00&max-results=50&start=89&by-date=false
+2025-08-05 23:19:50,105 - INFO - 已爬取 0 篇文章，总计: 415/1000
+2025-08-05 23:19:50,190 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E4%BB%80%E4%B9%88%E9%83%BD%E7%9F%A5%E9%81%93?updated-max=2016-09-03T01:48:00%2B08:00&max-results=20&start=15&by-date=false
+2025-08-05 23:19:50,191 - INFO - 已爬取 0 篇文章，总计: 415/1000
+2025-08-05 23:19:50,285 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-01-01T12:00:00%2B08:00&max-results=50&reverse-paginate=true&start=35&by-date=false
+2025-08-05 23:19:50,285 - INFO - 已爬取 7 篇文章，总计: 415/1000
+2025-08-05 23:19:50,603 - INFO - 正在爬取: https://annas-archive.org/search
+2025-08-05 23:19:50,607 - INFO - 已爬取 46 篇文章，总计: 415/1000
+2025-08-05 23:19:50,799 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E6%97%B6%E6%94%BF?updated-max=2022-06-13T18:16:00%2B08:00&max-results=20&start=20&by-date=false
+2025-08-05 23:19:50,800 - INFO - 已爬取 0 篇文章，总计: 420/1000
+2025-08-05 23:19:50,870 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2024-09-20T11:15:00%2B08:00&max-results=50&start=94&by-date=false
+2025-08-05 23:19:50,870 - INFO - 已爬取 0 篇文章，总计: 420/1000
+2025-08-05 23:19:50,959 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/star?updated-max=2023-01-20T11:16:00%2B08:00&max-results=20&start=20&by-date=false
+2025-08-05 23:19:51,006 - INFO - 已爬取 0 篇文章，总计: 420/1000
+2025-08-05 23:19:51,507 - INFO - 已爬取 0 篇文章，总计: 477/1000
+2025-08-05 23:19:51,810 - INFO - 已爬取 5 篇文章，总计: 477/1000
+2025-08-05 23:19:52,251 - INFO - 已爬取 7 篇文章，总计: 524/1000
+2025-08-05 23:19:52,766 - INFO - 已爬取 50 篇文章，总计: 524/1000
+2025-08-05 23:19:52,813 - INFO - 已爬取 47 篇文章，总计: 544/1000
+2025-08-05 23:19:53,089 - INFO - 已爬取 0 篇文章，总计: 583/1000
+2025-08-05 23:19:53,554 - INFO - 已爬取 0 篇文章，总计: 583/1000
+2025-08-05 23:19:53,584 - INFO - 已爬取 20 篇文章，总计: 583/1000
+2025-08-05 23:19:53,908 - INFO - 已爬取 39 篇文章，总计: 583/1000
+2025-08-05 23:19:59,615 - WARNING - 获取页面失败 (尝试 1/3): http://webarchive.loc.gov/ - HTTPConnectionPool(host='127.0.0.1', port=7897): Read timed out. (read timeout=10)
+2025-08-05 23:20:10,891 - WARNING - 获取页面失败 (尝试 2/3): http://webarchive.loc.gov/ - HTTPConnectionPool(host='127.0.0.1', port=7897): Read timed out. (read timeout=10)
+2025-08-05 23:20:23,691 - WARNING - 获取页面失败 (尝试 3/3): http://webarchive.loc.gov/ - HTTPConnectionPool(host='127.0.0.1', port=7897): Read timed out. (read timeout=10)
+2025-08-05 23:20:23,692 - ERROR - 最终获取失败: http://webarchive.loc.gov/
+2025-08-05 23:20:23,693 - INFO - 已爬取 0 篇文章，总计: 583/1000
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://archive.md/2020.04.21/https://rt.live/
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://annas-archive.org
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2024-11-21T13:18:00%2B08:00&max-results=50&reverse-paginate=true&start=46&by-date=false
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/star?updated-max=2022-09-02T09:27:00%2B08:00&max-results=20&start=40&by-date=false
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/porn?max-results=20
+2025-08-05 23:20:23,700 - INFO - 正在爬取: http://blog.archive.today/ask
+2025-08-05 23:20:23,700 - INFO - 正在爬取: mailto:webmaster@archive.md
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://annas-archive.org/search?page=2
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://archive.md/rss
+2025-08-05 23:20:23,700 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/news?updated-max=2015-12-29T23:09:00%2B08:00&max-results=20&start=36&by-date=false
+2025-08-05 23:20:23,705 - WARNING - 获取页面失败 (尝试 1/3): mailto:webmaster@archive.md - No connection adapters were found for 'mailto:webmaster@archive.md'
+2025-08-05 23:20:24,307 - WARNING - 获取页面失败 (尝试 1/3): https://archive.md/2020.04.21/https://rt.live/ - 429 Client Error: Too Many Requests for url: https://archive.md/2020.04.21/https://rt.live/
+2025-08-05 23:20:25,011 - WARNING - 获取页面失败 (尝试 2/3): mailto:webmaster@archive.md - No connection adapters were found for 'mailto:webmaster@archive.md'
+2025-08-05 23:20:25,042 - INFO - 正在爬取: https://annas-archive.org/search?page=99
+2025-08-05 23:20:25,058 - INFO - 已爬取 0 篇文章，总计: 583/1000
+2025-08-05 23:20:25,198 - INFO - 正在爬取: https://annas-archive.li
+2025-08-05 23:20:25,198 - INFO - 已爬取 0 篇文章，总计: 583/1000
+2025-08-05 23:20:25,885 - INFO - 正在爬取: https://annas-archive.org/search?page=1
+2025-08-05 23:20:25,921 - INFO - 已爬取 19 篇文章，总计: 659/1000
+2025-08-05 23:20:26,497 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2024-11-20T01:12:00%2B08:00&max-results=50&reverse-paginate=true&start=82&by-date=false
+2025-08-05 23:20:26,513 - INFO - 已爬取 20 篇文章，总计: 659/1000
+2025-08-05 23:20:26,576 - INFO - 正在爬取: https://archive.md/*.microsoft.com
+2025-08-05 23:20:26,591 - INFO - 已爬取 0 篇文章，总计: 659/1000
+2025-08-05 23:20:26,788 - WARNING - 获取页面失败 (尝试 3/3): mailto:webmaster@archive.md - No connection adapters were found for 'mailto:webmaster@archive.md'
+2025-08-05 23:20:26,789 - ERROR - 最终获取失败: mailto:webmaster@archive.md
+2025-08-05 23:20:26,790 - INFO - 正在爬取: https://archive.today/
+2025-08-05 23:20:26,790 - INFO - 已爬取 0 篇文章，总计: 659/1000
+2025-08-05 23:20:26,979 - INFO - 正在爬取: https://archive.md/http://twitter.com/burgerking
+2025-08-05 23:20:26,979 - INFO - 已爬取 37 篇文章，总计: 659/1000
+2025-08-05 23:20:27,057 - INFO - 正在爬取: https://hwv430.blogspot.com/search?updated-max=2025-07-16T00:00:00%2B08:00&max-results=50&reverse-paginate=true
+2025-08-05 23:20:27,073 - INFO - 已爬取 0 篇文章，总计: 659/1000
+2025-08-05 23:20:27,341 - WARNING - 获取页面失败 (尝试 1/3): https://archive.md/*.microsoft.com - 429 Client Error: Too Many Requests for url: https://archive.md/*.microsoft.com
+2025-08-05 23:20:27,447 - WARNING - 获取页面失败 (尝试 2/3): https://archive.md/2020.04.21/https://rt.live/ - 429 Client Error: Too Many Requests for url: https://archive.md/2020.04.21/https://rt.live/
+2025-08-05 23:20:27,804 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/%E4%BB%80%E4%B9%88%E9%83%BD%E7%9F%A5%E9%81%93?max-results=20
+2025-08-05 23:20:27,819 - INFO - 已爬取 0 篇文章，总计: 659/1000
+2025-08-05 23:20:27,974 - INFO - 正在爬取: https://hwv430.blogspot.com/search/label/star?max-results=20
+2025-08-05 23:20:27,990 - INFO - 已爬取 0 篇文章，总计: 659/1000
+2025-08-05 23:20:28,066 - INFO - 已爬取 0 篇文章，总计: 659/1000
+2025-08-05 23:20:28,797 - INFO - 已爬取 38 篇文章，总计: 697/1000
+2025-08-05 23:20:28,950 - WARNING - 获取页面失败 (尝试 1/3): https://archive.md/http://twitter.com/burgerking - 429 Client Error: Too Many Requests for url: https://archive.md/http://twitter.com/burgerking
