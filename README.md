@@ -61,5 +61,3 @@ python app.py
 ```
 
 访问 http://localhost:5000 查看博客展示界面。
-
-## 📁 项目结构
