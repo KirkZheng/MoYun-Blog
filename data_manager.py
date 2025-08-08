@@ -4,6 +4,10 @@ from datetime import datetime, date
 from typing import List, Dict, Optional
 import threading
 from collections import defaultdict
+import re
+from langdetect import detect
+import jieba
+from collections import Counter
 
 class BlogDataManager:
     def __init__(self, data_file='blog_data.json'):
@@ -60,9 +64,123 @@ class BlogDataManager:
         """检查文章是否已存在"""
         return any(post.get('url') == url for post in self.posts)
     
-    def get_all_posts(self, page: int = 1, per_page: int = 12) -> Dict:
-        """获取所有文章（分页）"""
-        sorted_posts = sorted(self.posts, key=lambda x: x.get('id', 0), reverse=True)
+    def detect_language(self, text: str) -> str:
+        """检测文本语言"""
+        try:
+            # 清理HTML标签
+            clean_text = re.sub(r'<[^>]+>', '', text)
+            clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+            
+            if len(clean_text) < 10:
+                return 'unknown'
+            
+            lang = detect(clean_text)
+            return lang
+        except Exception:
+            return 'unknown'
+    
+    def extract_keywords(self, text: str, lang: str = 'zh', top_k: int = 5) -> List[str]:
+        """提取关键词"""
+        try:
+            # 清理HTML标签
+            clean_text = re.sub(r'<[^>]+>', '', text)
+            clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+            
+            if lang == 'zh':
+                # 中文分词
+                words = jieba.cut(clean_text)
+                # 过滤停用词和短词
+                stop_words = {'的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这'}
+                filtered_words = [word for word in words if len(word) > 1 and word not in stop_words and word.strip()]
+            else:
+                # 英文处理
+                words = re.findall(r'\b[a-zA-Z]{3,}\b', clean_text.lower())
+                stop_words = {'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'among', 'this', 'that', 'these', 'those', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can'}
+                filtered_words = [word for word in words if word not in stop_words]
+            
+            # 统计词频
+            word_count = Counter(filtered_words)
+            return [word for word, count in word_count.most_common(top_k)]
+        except Exception:
+            return []
+    
+    def calculate_popularity_score(self, post: Dict) -> float:
+        """计算文章热度分数"""
+        score = 0.0
+        
+        # 标题长度权重（适中长度得分更高）
+        title_len = len(post.get('title', ''))
+        if 10 <= title_len <= 50:
+            score += 2.0
+        elif 5 <= title_len <= 80:
+            score += 1.0
+        
+        # 内容长度权重
+        content_len = len(post.get('content', ''))
+        if content_len > 1000:
+            score += 3.0
+        elif content_len > 500:
+            score += 2.0
+        elif content_len > 200:
+            score += 1.0
+        
+        # 摘要质量权重
+        summary_len = len(post.get('summary', ''))
+        if 50 <= summary_len <= 200:
+            score += 1.5
+        
+        # 发布时间权重（越新越高）
+        try:
+            publish_date = post.get('publish_date')
+            if publish_date:
+                if isinstance(publish_date, str):
+                    publish_date = datetime.fromisoformat(publish_date).date()
+                days_ago = (date.today() - publish_date).days
+                if days_ago <= 7:
+                    score += 3.0
+                elif days_ago <= 30:
+                    score += 2.0
+                elif days_ago <= 90:
+                    score += 1.0
+        except Exception:
+            pass
+        
+        # 关键词数量权重
+        keywords = post.get('keywords', [])
+        score += len(keywords) * 0.5
+        
+        return score
+    
+    def process_posts_metadata(self):
+        """处理文章元数据（语言检测、关键词提取、热度计算）"""
+        with self.lock:
+            for post in self.posts:
+                # 检测语言
+                if 'language' not in post:
+                    text_to_detect = f"{post.get('title', '')} {post.get('summary', '')}"
+                    post['language'] = self.detect_language(text_to_detect)
+                
+                # 提取关键词
+                if 'keywords' not in post:
+                    text_for_keywords = f"{post.get('title', '')} {post.get('content', '')}"
+                    post['keywords'] = self.extract_keywords(text_for_keywords, post.get('language', 'zh'))
+                
+                # 计算热度分数
+                post['popularity_score'] = self.calculate_popularity_score(post)
+    
+    def get_filtered_posts(self, filter_english: bool = False, page: int = 1, per_page: int = 12) -> Dict:
+        """获取过滤后的文章（可选择过滤纯英文文章）"""
+        # 确保元数据已处理
+        self.process_posts_metadata()
+        
+        filtered_posts = self.posts
+        
+        if filter_english:
+            # 过滤掉纯英文文章
+            filtered_posts = [post for post in self.posts if post.get('language', 'unknown') != 'en']
+        
+        # 按热度排序
+        sorted_posts = sorted(filtered_posts, key=lambda x: x.get('popularity_score', 0), reverse=True)
         
         start = (page - 1) * per_page
         end = start + per_page
@@ -74,6 +192,10 @@ class BlogDataManager:
             'per_page': per_page,
             'pages': (len(sorted_posts) + per_page - 1) // per_page
         }
+    
+    def get_all_posts(self, page: int = 1, per_page: int = 12) -> Dict:
+        """获取所有文章（过滤纯英文，按热度排序）"""
+        return self.get_filtered_posts(filter_english=True, page=page, per_page=per_page)
     
     def search_posts(self, query: str, page: int = 1, per_page: int = 12) -> Dict:
         """搜索文章"""

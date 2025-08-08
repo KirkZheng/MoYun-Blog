@@ -9,11 +9,12 @@ app = create_app()
 
 @app.route('/')
 def index():
-    """主页"""
+    """主页 - 过滤纯英文文章，按热度排序"""
     page = 1
     per_page = 12
     
-    result = data_manager.get_all_posts(page=page, per_page=per_page)
+    # 获取过滤纯英文文章的结果，按热度排序
+    result = data_manager.get_filtered_posts(filter_english=True, page=page, per_page=per_page)
     
     return render_template('index.html', posts=result)
 
@@ -42,11 +43,11 @@ def post_detail(post_id):
 
 @app.route('/api/posts')
 def api_posts():
-    """API: 获取文章列表（用于无限滚动）"""
+    """API: 获取文章列表（用于无限滚动）- 过滤纯英文，按热度排序"""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 12, type=int)
     
-    result = data_manager.get_all_posts(page=page, per_page=per_page)
+    result = data_manager.get_filtered_posts(filter_english=True, page=page, per_page=per_page)
     
     return jsonify({
         'success': True,
