@@ -9,6 +9,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from typing import List, Set, Dict
 import random
+import json
+import os
 from data_manager import data_manager
 
 # 配置日志
@@ -23,14 +25,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class FastBlogCrawler:
-    def __init__(self, base_url, target_count=1000, max_workers=10):
+    def __init__(self, base_url, max_workers=10):
         self.base_url = base_url
-        self.target_count = target_count
         self.max_workers = max_workers
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         })
+        
+        # 缓存文件
+        self.cache_file = 'crawler_cache.json'
         
         # 爬取状态
         self.crawled_urls: Set[str] = set()
@@ -38,6 +42,9 @@ class FastBlogCrawler:
         self.failed_urls: Set[str] = set()
         self.posts_count = 0
         self.lock = threading.Lock()
+        
+        # 加载缓存
+        self.load_cache()
         
         # 用户代理轮换
         self.user_agents = [
@@ -48,8 +55,45 @@ class FastBlogCrawler:
             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         ]
     
+    def load_cache(self):
+        """加载爬取缓存"""
+        try:
+            if os.path.exists(self.cache_file):
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                    self.crawled_urls = set(cache_data.get('crawled_urls', []))
+                    self.failed_urls = set(cache_data.get('failed_urls', []))
+                    logger.info(f"加载缓存: 已爬取URL {len(self.crawled_urls)} 个，失败URL {len(self.failed_urls)} 个")
+            
+            # 从数据管理器加载已存在的文章URL
+            existing_urls = set()
+            for post in data_manager.posts:
+                if post.get('url'):
+                    existing_urls.add(post['url'])
+            
+            self.crawled_urls.update(existing_urls)
+            logger.info(f"从数据库加载已存在文章URL: {len(existing_urls)} 个")
+            
+        except Exception as e:
+            logger.error(f"加载缓存失败: {e}")
+            self.crawled_urls = set()
+            self.failed_urls = set()
+    
+    def save_cache(self):
+        """保存爬取缓存"""
+        try:
+            cache_data = {
+                'crawled_urls': list(self.crawled_urls),
+                'failed_urls': list(self.failed_urls),
+                'last_update': datetime.now().isoformat()
+            }
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"保存缓存失败: {e}")
+    
     def get_random_delay(self, min_delay=0.5, max_delay=1.5):
-        """获取随机延迟时间（减少延迟提升速度）"""
+        """获取随机延迟时间"""
         return random.uniform(min_delay, max_delay)
     
     def rotate_user_agent(self):
@@ -61,7 +105,7 @@ class FastBlogCrawler:
         for attempt in range(retries):
             try:
                 self.rotate_user_agent()
-                response = self.session.get(url, timeout=10)
+                response = self.session.get(url, timeout=30)
                 response.raise_for_status()
                 return response.text
             except Exception as e:
@@ -71,33 +115,39 @@ class FastBlogCrawler:
                 else:
                     logger.error(f"最终获取失败: {url}")
                     return None
+        return None
     
     def extract_date(self, date_text):
         """提取日期"""
         if not date_text:
             return None
         
+        # 清理日期文本
+        date_text = re.sub(r'[^\d\-/年月日]', '', date_text)
+        
+        # 尝试多种日期格式
         date_patterns = [
-            r'(\d{1,2})/(\d{1,2})/(\d{4})',
             r'(\d{4})-(\d{1,2})-(\d{1,2})',
-            r'(\d{1,2})\.(\d{1,2})\.(\d{4})',
+            r'(\d{4})/(\d{1,2})/(\d{1,2})',
+            r'(\d{4})年(\d{1,2})月(\d{1,2})日',
+            r'(\d{1,2})/(\d{1,2})/(\d{4})',
+            r'(\d{1,2})-(\d{1,2})-(\d{4})'
         ]
         
         for pattern in date_patterns:
-            match = re.search(pattern, str(date_text))
+            match = re.search(pattern, date_text)
             if match:
                 try:
-                    if '/' in pattern:
-                        month, day, year = match.groups()
-                        return date(int(year), int(month), int(day))
-                    elif '-' in pattern:
-                        year, month, day = match.groups()
-                        return date(int(year), int(month), int(day))
-                    elif '.' in pattern:
-                        day, month, year = match.groups()
-                        return date(int(year), int(month), int(day))
+                    groups = match.groups()
+                    if len(groups) == 3:
+                        if len(groups[0]) == 4:  # 年份在前
+                            year, month, day = int(groups[0]), int(groups[1]), int(groups[2])
+                        else:  # 年份在后
+                            day, month, year = int(groups[0]), int(groups[1]), int(groups[2])
+                        return date(year, month, day)
                 except ValueError:
                     continue
+        
         return None
     
     def generate_summary(self, content, max_length=200):
@@ -106,35 +156,41 @@ class FastBlogCrawler:
             return ""
         
         # 移除HTML标签
-        soup = BeautifulSoup(content, 'html.parser')
-        text = soup.get_text()
+        clean_content = re.sub(r'<[^>]+>', '', content)
+        clean_content = re.sub(r'\s+', ' ', clean_content).strip()
         
-        # 清理文本
-        text = re.sub(r'\s+', ' ', text).strip()
+        if len(clean_content) <= max_length:
+            return clean_content
         
-        # 截取摘要
-        if len(text) <= max_length:
-            return text
+        # 尝试在句号处截断
+        sentences = re.split(r'[。！？.!?]', clean_content)
+        summary = ""
+        for sentence in sentences:
+            if len(summary + sentence) <= max_length:
+                summary += sentence + "。"
+            else:
+                break
         
-        # 在句号处截断
-        sentences = text[:max_length].split('。')
-        if len(sentences) > 1:
-            return '。'.join(sentences[:-1]) + '。'
+        if not summary:
+            summary = clean_content[:max_length] + "..."
         
-        return text[:max_length] + '...'
+        return summary.strip()
     
     def discover_pagination_urls(self, html_content, base_url):
         """发现分页URL"""
         soup = BeautifulSoup(html_content, 'html.parser')
         urls = set()
         
-        # Blogspot分页链接
+        # 查找分页链接
         pagination_selectors = [
             'a[href*="max-results"]',
-            'a[href*="start="]',
+            'a[href*="start-index"]',
             '.blog-pager a',
-            '.pagination a',
-            'a[href*="page"]'
+            '.pager a',
+            'a:contains("下一页")',
+            'a:contains("Next")',
+            'a:contains("更多")',
+            'a:contains("More")'
         ]
         
         for selector in pagination_selectors:
@@ -143,7 +199,8 @@ class FastBlogCrawler:
                 href = link.get('href')
                 if href:
                     full_url = urljoin(base_url, href)
-                    urls.add(full_url)
+                    if self.base_url in full_url:
+                        urls.add(full_url)
         
         return urls
     
@@ -152,12 +209,13 @@ class FastBlogCrawler:
         soup = BeautifulSoup(html_content, 'html.parser')
         urls = set()
         
-        # 归档链接选择器
+        # 查找归档链接
         archive_selectors = [
+            'a[href*="/search/label/"]',
             'a[href*="archive"]',
             '.archive-link a',
-            '.sidebar a[href*="search"]',
-            'a[href*="label"]'
+            '.label-link a',
+            'a[href*="/p/"]'
         ]
         
         for selector in archive_selectors:
@@ -166,7 +224,8 @@ class FastBlogCrawler:
                 href = link.get('href')
                 if href:
                     full_url = urljoin(base_url, href)
-                    urls.add(full_url)
+                    if self.base_url in full_url:
+                        urls.add(full_url)
         
         return urls
     
@@ -179,10 +238,10 @@ class FastBlogCrawler:
         post_selectors = [
             '.post',
             '.blog-post',
-            '.entry',
             'article',
+            '.entry',
             '.post-outer',
-            '.hentry'
+            '[class*="post"]'
         ]
         
         post_elements = []
@@ -192,78 +251,36 @@ class FastBlogCrawler:
                 post_elements = elements
                 break
         
-        for post_element in post_elements:
+        for post_elem in post_elements:
             try:
                 # 提取标题
-                title_selectors = [
-                    '.post-title a',
-                    '.entry-title a',
-                    'h3 a',
-                    'h2 a',
-                    'h1 a',
-                    '.post-title',
-                    '.entry-title'
-                ]
+                title_elem = post_elem.select_one('h1, h2, h3, .post-title, .entry-title, [class*="title"]')
+                title = title_elem.get_text(strip=True) if title_elem else "无标题"
                 
-                title = None
-                post_url = None
+                # 提取链接
+                link_elem = post_elem.select_one('a[href]')
+                if not link_elem:
+                    link_elem = title_elem.select_one('a[href]') if title_elem else None
                 
-                for title_selector in title_selectors:
-                    title_element = post_element.select_one(title_selector)
-                    if title_element:
-                        title = title_element.get_text().strip()
-                        if title_element.name == 'a':
-                            post_url = title_element.get('href')
-                        break
-                
-                if not title:
+                if not link_elem:
                     continue
                 
-                # 如果没有找到链接，尝试其他方式
-                if not post_url:
-                    link_selectors = ['a[href*=".html"]', 'a[href*="/20"]']
-                    for link_selector in link_selectors:
-                        link_element = post_element.select_one(link_selector)
-                        if link_element:
-                            post_url = link_element.get('href')
-                            break
+                post_url = urljoin(page_url, link_elem.get('href'))
                 
-                if post_url:
-                    post_url = urljoin(page_url, post_url)
+                # 检查是否已爬取过
+                if post_url in self.crawled_urls:
+                    continue
                 
                 # 提取内容
-                content_selectors = [
-                    '.post-body',
-                    '.entry-content',
-                    '.post-content',
-                    '.content'
-                ]
-                
-                content = ""
-                for content_selector in content_selectors:
-                    content_element = post_element.select_one(content_selector)
-                    if content_element:
-                        content = str(content_element)
-                        break
+                content_elem = post_elem.select_one('.post-body, .entry-content, .content, [class*="content"]')
+                content = content_elem.get_text(strip=True) if content_elem else ""
                 
                 # 提取日期
-                date_selectors = [
-                    '.published',
-                    '.post-timestamp',
-                    '.date',
-                    '.post-date',
-                    'time',
-                    '.entry-date'
-                ]
-                
+                date_elem = post_elem.select_one('.published, .post-timestamp, .date, [class*="date"], time')
                 publish_date = None
-                for date_selector in date_selectors:
-                    date_element = post_element.select_one(date_selector)
-                    if date_element:
-                        date_text = date_element.get_text() or date_element.get('datetime') or date_element.get('title')
-                        publish_date = self.extract_date(date_text)
-                        if publish_date:
-                            break
+                if date_elem:
+                    date_text = date_elem.get_text(strip=True) or date_elem.get('datetime', '')
+                    publish_date = self.extract_date(date_text)
                 
                 # 生成摘要
                 summary = self.generate_summary(content)
@@ -273,7 +290,9 @@ class FastBlogCrawler:
                     'url': post_url,
                     'content': content,
                     'summary': summary,
-                    'publish_date': publish_date
+                    'publish_date': publish_date,
+                    'source_page': page_url,
+                    'crawl_time': datetime.now().isoformat()
                 }
                 
                 posts.append(post_data)
@@ -289,18 +308,35 @@ class FastBlogCrawler:
         if not posts_batch:
             return 0
         
-        added_count = data_manager.add_posts_batch(posts_batch)
+        # 过滤已存在的文章
+        new_posts = []
+        for post in posts_batch:
+            if not data_manager.post_exists(post.get('url')):
+                new_posts.append(post)
+        
+        if not new_posts:
+            return 0
+        
+        added_count = data_manager.add_posts_batch(new_posts)
         
         if added_count > 0:
             data_manager.save_data()
             logger.info(f"批量保存了 {added_count} 篇新文章")
+            
+            # 更新已爬取URL缓存
+            with self.lock:
+                for post in new_posts:
+                    self.crawled_urls.add(post['url'])
+            
+            # 保存缓存
+            self.save_cache()
         
         return added_count
     
     def crawl_single_page(self, url):
         """爬取单个页面"""
         with self.lock:
-            if url in self.crawled_urls or self.posts_count >= self.target_count:
+            if url in self.crawled_urls:
                 return []
             self.crawled_urls.add(url)
         
@@ -320,18 +356,20 @@ class FastBlogCrawler:
         new_archive_urls = self.discover_archive_urls(html_content, url)
         
         with self.lock:
-            self.discovered_urls.update(new_pagination_urls)
-            self.discovered_urls.update(new_archive_urls)
+            # 只添加未爬取过的URL
+            new_urls = (new_pagination_urls | new_archive_urls) - self.crawled_urls
+            self.discovered_urls.update(new_urls)
             self.posts_count += len(posts)
         
-        # 随机延迟（减少延迟）
+        # 随机延迟
         time.sleep(self.get_random_delay())
         
         return posts
     
     def crawl_all_posts(self):
-        """爬取所有文章"""
-        logger.info(f"开始爬取，目标: {self.target_count} 篇文章，并发数: {self.max_workers}")
+        """爬取所有文章 - 无数量限制，直到爬取完成"""
+        logger.info(f"开始全量爬取，并发数: {self.max_workers}")
+        logger.info(f"已缓存URL数量: {len(self.crawled_urls)}")
         
         # 初始URL
         initial_urls = {
@@ -340,16 +378,24 @@ class FastBlogCrawler:
             f"{self.base_url}/search?updated-max=2024-12-31T23:59:59%2B08:00&max-results=50"
         }
         
-        self.discovered_urls.update(initial_urls)
+        # 过滤已爬取的URL
+        new_initial_urls = initial_urls - self.crawled_urls
+        self.discovered_urls.update(new_initial_urls)
+        
         all_posts = []
+        consecutive_empty_rounds = 0
+        max_empty_rounds = 3  # 连续3轮没有新文章就停止
         
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            while self.discovered_urls and self.posts_count < self.target_count:
+            while self.discovered_urls and consecutive_empty_rounds < max_empty_rounds:
                 # 获取待爬取的URL
                 urls_to_crawl = list(self.discovered_urls - self.crawled_urls)[:self.max_workers * 2]
                 
                 if not urls_to_crawl:
+                    logger.info("没有更多URL可爬取")
                     break
+                
+                logger.info(f"本轮爬取URL数量: {len(urls_to_crawl)}")
                 
                 # 提交爬取任务
                 future_to_url = {executor.submit(self.crawl_single_page, url): url for url in urls_to_crawl}
@@ -362,8 +408,6 @@ class FastBlogCrawler:
                         batch_posts.extend(posts)
                         all_posts.extend(posts)
                         
-                        logger.info(f"已爬取 {len(posts)} 篇文章，总计: {self.posts_count}/{self.target_count}")
-                        
                     except Exception as e:
                         logger.error(f"爬取失败 {url}: {e}")
                         with self.lock:
@@ -371,38 +415,45 @@ class FastBlogCrawler:
                 
                 # 批量保存
                 if batch_posts:
-                    self.save_posts_batch(batch_posts)
+                    saved_count = self.save_posts_batch(batch_posts)
+                    logger.info(f"本轮发现 {len(batch_posts)} 篇文章，保存 {saved_count} 篇新文章，总计: {self.posts_count}")
+                    consecutive_empty_rounds = 0
+                else:
+                    consecutive_empty_rounds += 1
+                    logger.info(f"本轮未发现新文章 (连续 {consecutive_empty_rounds}/{max_empty_rounds} 轮)")
                 
-                # 检查是否达到目标
-                if self.posts_count >= self.target_count:
-                    logger.info(f"已达到目标文章数: {self.posts_count}")
-                    break
+                # 移除已处理的URL
+                with self.lock:
+                    self.discovered_urls -= set(urls_to_crawl)
         
         # 最终统计
         logger.info(f"爬取完成！")
-        logger.info(f"总文章数: {len(all_posts)}")
-        logger.info(f"成功URL: {len(self.crawled_urls)}")
+        logger.info(f"本次新增文章数: {len(all_posts)}")
+        logger.info(f"总爬取URL: {len(self.crawled_urls)}")
         logger.info(f"失败URL: {len(self.failed_urls)}")
+        
+        # 保存最终缓存
+        self.save_cache()
         
         return all_posts
 
 def main():
     """主函数"""
     base_url = 'https://hwv430.blogspot.com'
-    target_count = 1000
-    max_workers = 10  # 增加并发数
+    max_workers = 10
     
-    crawler = FastBlogCrawler(base_url, target_count, max_workers)
+    crawler = FastBlogCrawler(base_url, max_workers)
     
     start_time = time.time()
     posts = crawler.crawl_all_posts()
     end_time = time.time()
     
     logger.info(f"爬取耗时: {end_time - start_time:.2f} 秒")
-    logger.info(f"平均速度: {len(posts) / (end_time - start_time):.2f} 篇/秒")
+    if posts:
+        logger.info(f"平均速度: {len(posts) / (end_time - start_time):.2f} 篇/秒")
     
     # 显示统计信息
-    stats = data_manager.get_stats()
+    stats = data_manager.get_stats() if hasattr(data_manager, 'get_stats') else {}
     logger.info(f"数据库统计: {stats}")
 
 if __name__ == '__main__':
