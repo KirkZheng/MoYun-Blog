@@ -280,5 +280,142 @@ class BlogDataManager:
             'pages': (len(sorted_posts) + per_page - 1) // per_page
         }
 
+    def get_stats(self) -> Dict:
+        """获取博客统计信息"""
+        # 确保元数据已处理
+        self.process_posts_metadata()
+        
+        stats = {
+            'total_posts': len(self.posts),
+            'yearly_stats': {},
+            'recent_posts': 0,  # 最近30天
+        }
+        
+        if not self.posts:
+            return stats
+        
+        yearly_count = defaultdict(int)
+        recent_count = 0
+        
+        current_date = date.today()
+        
+        for post in self.posts:
+            # 日期统计
+            publish_date = post.get('publish_date')
+            if publish_date:
+                try:
+                    if isinstance(publish_date, str):
+                        publish_date = datetime.fromisoformat(publish_date).date()
+                    
+                    # 年度统计
+                    year = publish_date.year
+                    yearly_count[year] += 1
+                    
+                    # 最近30天统计
+                    days_diff = (current_date - publish_date).days
+                    if days_diff <= 30:
+                        recent_count += 1
+                        
+                except Exception:
+                    pass
+        
+        # 整理统计结果
+        stats['yearly_stats'] = dict(yearly_count)
+        stats['recent_posts'] = recent_count
+        
+        return stats
+    
+    def get_language_distribution(self) -> Dict[str, int]:
+        """获取语言分布统计"""
+        self.process_posts_metadata()
+        language_count = defaultdict(int)
+        
+        for post in self.posts:
+            lang = post.get('language', 'unknown')
+            language_count[lang] += 1
+        
+        return dict(language_count)
+    
+    def get_monthly_trend(self, months: int = 12) -> List[Dict]:
+        """获取月度发布趋势"""
+        monthly_count = defaultdict(int)
+        
+        for post in self.posts:
+            publish_date = post.get('publish_date')
+            if publish_date:
+                try:
+                    if isinstance(publish_date, str):
+                        publish_date = datetime.fromisoformat(publish_date).date()
+                    
+                    month_key = f"{publish_date.year}-{publish_date.month:02d}"
+                    monthly_count[month_key] += 1
+                except Exception:
+                    pass
+        
+        # 获取最近N个月的数据
+        sorted_months = sorted(monthly_count.items(), key=lambda x: x[0], reverse=True)[:months]
+        
+        return [
+            {
+                'month': month,
+                'count': count,
+                'year': int(month.split('-')[0]),
+                'month_num': int(month.split('-')[1])
+            }
+            for month, count in sorted_months
+        ]
+    
+    def get_content_analysis(self) -> Dict:
+        """获取内容分析统计"""
+        self.process_posts_metadata()
+        
+        analysis = {
+            'avg_title_length': 0,
+            'avg_content_length': 0,
+            'avg_keywords_count': 0,
+            'length_distribution': {
+                'very_short': 0,  # < 200字
+                'short': 0,       # 200-500字
+                'medium': 0,      # 500-1500字
+                'long': 0,        # 1500-3000字
+                'very_long': 0    # > 3000字
+            }
+        }
+        
+        if not self.posts:
+            return analysis
+        
+        total_title_len = 0
+        total_content_len = 0
+        total_keywords = 0
+        
+        for post in self.posts:
+            title_len = len(post.get('title', ''))
+            content_len = len(post.get('content', ''))
+            keywords_count = len(post.get('keywords', []))
+            
+            total_title_len += title_len
+            total_content_len += content_len
+            total_keywords += keywords_count
+            
+            # 内容长度分布
+            if content_len < 200:
+                analysis['length_distribution']['very_short'] += 1
+            elif content_len < 500:
+                analysis['length_distribution']['short'] += 1
+            elif content_len < 1500:
+                analysis['length_distribution']['medium'] += 1
+            elif content_len < 3000:
+                analysis['length_distribution']['long'] += 1
+            else:
+                analysis['length_distribution']['very_long'] += 1
+        
+        post_count = len(self.posts)
+        analysis['avg_title_length'] = round(total_title_len / post_count, 1)
+        analysis['avg_content_length'] = round(total_content_len / post_count, 1)
+        analysis['avg_keywords_count'] = round(total_keywords / post_count, 1)
+        
+        return analysis
+
 # 全局数据管理器实例
 data_manager = BlogDataManager()

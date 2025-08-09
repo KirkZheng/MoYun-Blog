@@ -54,5 +54,48 @@ def api_posts():
         'data': result
     })
 
+@app.route('/stats')
+def stats():
+    """统计页面"""
+    stats_data = data_manager.get_stats()
+    return render_template('stats.html', stats=stats_data)
+
+@app.route('/api/stats')
+def api_stats():
+    """API: 获取统计数据"""
+    stats_data = data_manager.get_stats()
+    return jsonify({
+        'success': True,
+        'data': stats_data
+    })
+
+@app.route('/api/stats/language')
+def api_language_stats():
+    """API: 获取语言分布统计"""
+    language_data = data_manager.get_language_distribution()
+    return jsonify({
+        'success': True,
+        'data': language_data
+    })
+
+@app.route('/api/stats/trend')
+def api_trend_stats():
+    """API: 获取月度趋势统计"""
+    months = request.args.get('months', 12, type=int)
+    trend_data = data_manager.get_monthly_trend(months)
+    return jsonify({
+        'success': True,
+        'data': trend_data
+    })
+
+@app.route('/api/stats/content')
+def api_content_stats():
+    """API: 获取内容分析统计"""
+    content_data = data_manager.get_content_analysis()
+    return jsonify({
+        'success': True,
+        'data': content_data
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=5000)
